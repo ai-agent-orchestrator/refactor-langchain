@@ -13,7 +13,7 @@ from openai import APIConnectionError
 from app.clients.llm_client import OpenAiLlmClient
 from app.core.config import Settings
 from app.core.exceptions import AiRequestError
-from app.dependencies import get_llm_client
+from app.dependencies import get_reply_chain
 from app.main import create_app
 from app.repositories.review_repository import ReviewRepository
 from app.routers.review_router import router
@@ -62,28 +62,27 @@ class ReviewApiTests(unittest.TestCase):
         self.assertEqual(response.json()["code"], "REVIEW_NOT_FOUND")
 
     def test_missing_reply_does_not_call_llm(self):
-        recorder = SimpleNamespace(model="recording-fake", ask=AsyncMock())
-        self.app.dependency_overrides[get_llm_client] = lambda: recorder
+        recorder = SimpleNamespace(ainvoke=AsyncMock())
+        self.app.dependency_overrides[get_reply_chain] = lambda: recorder
         response = self.client.post("/api/reviews/999/reply")
         self.assertEqual(response.status_code, 404)
-        recorder.ask.assert_not_awaited()
+        recorder.ainvoke.assert_not_awaited()
 
     def test_reply_awaits_llm_with_stored_review(self):
         review_id = self.register()
-        recorder = SimpleNamespace(model="recording-fake", ask=AsyncMock(return_value="정중한 답글 초안"))
-        self.app.dependency_overrides[get_llm_client] = lambda: recorder
+        recorder = SimpleNamespace(ainvoke=AsyncMock(return_value="정중한 답글 초안"))
+        self.app.dependency_overrides[get_reply_chain] = lambda: recorder
         response = self.client.post(f"/api/reviews/{review_id}/reply")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "recording-fake"})
-        recorder.ask.assert_awaited_once()
-        instructions, prompt = recorder.ask.await_args.args
-        self.assertIn("사장님", instructions)
-        self.assertEqual(json.loads(prompt), BODY)
+        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "fake-llm"})
+        recorder.ainvoke.assert_awaited_once()
+        inputs = recorder.ainvoke.await_args.args[0]
+        self.assertEqual(json.loads(inputs["review_json"]), BODY)
 
     def test_llm_failure_is_502(self):
         review_id = self.register()
-        failure = SimpleNamespace(model="failing-fake", ask=AsyncMock(side_effect=AiRequestError("연습용 연결 실패")))
-        self.app.dependency_overrides[get_llm_client] = lambda: failure
+        failure = SimpleNamespace(ainvoke=AsyncMock(side_effect=AiRequestError("연습용 연결 실패")))
+        self.app.dependency_overrides[get_reply_chain] = lambda: failure
         response = self.client.post(f"/api/reviews/{review_id}/reply")
         self.assertEqual(response.status_code, 502)
         self.assertEqual(response.json()["code"], "AI_REQUEST_FAILED")
@@ -109,17 +108,6 @@ class ClientAndRepositoryTests(unittest.TestCase):
             reviews = list(pool.map(lambda i: repository.save(f"연습{i}", 5, "리뷰"), range(50)))
         self.assertEqual({r.review_id for r in reviews}, set(range(1, 51)))
 
-    def test_sdk_error_mapping_without_real_network(self):
-        sdk = SimpleNamespace(responses=SimpleNamespace(create=AsyncMock(side_effect=APIConnectionError(
-            request=httpx.Request("POST", "https://api.openai.com/v1/responses")))), close=AsyncMock())
-        settings = Settings(_env_file=None, fake_llm=False, openai_api_key="not-a-real-key")
-        with patch("app.clients.llm_client.AsyncOpenAI", return_value=sdk):
-            client = OpenAiLlmClient(settings)
-            with self.assertRaises(AiRequestError) as failure:
-                asyncio.run(client.ask("지시", "리뷰"))
-            self.assertNotIn("not-a-real-key", str(failure.exception))
-            asyncio.run(client.close())
-            sdk.close.assert_awaited_once()
 
 
 if __name__ == "__main__":

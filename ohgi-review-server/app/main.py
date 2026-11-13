@@ -7,6 +7,7 @@ from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.repositories.review_repository import ReviewRepository
 from app.routers.review_router import router
+from app.services.reply_service import build_reply_chain
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -18,6 +19,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                   else OpenAiLlmClient(config))
         application.state.llm_client = client
         try:
+            application.state.reply_chain = build_reply_chain(client)
             yield
         finally:
             await client.close()
