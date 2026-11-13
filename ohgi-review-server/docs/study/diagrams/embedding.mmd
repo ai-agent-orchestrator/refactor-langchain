@@ -1,0 +1,9 @@
+flowchart TD
+  subgraph P["시작: 문서 준비"]
+    A["규정 문서 청크"] --> B["aembed_documents"] --> C["문서 벡터 저장"]
+  end
+  subgraph Q["요청: 리뷰 검색"]
+    D["환불 문의 리뷰"] --> E["aembed_query"] --> F["질문 벡터"]
+  end
+  C --> G["같은 벡터 공간에서 가까운 문서 검색"]
+  F --> G

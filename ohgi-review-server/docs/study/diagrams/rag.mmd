@@ -1,0 +1,8 @@
+flowchart TD
+  A["고객 리뷰"] --> B["Retriever: 관련 규정 검색"]
+  B --> C["Document 목록"]
+  C --> D["policy_context<br/>본문을 프롬프트에 주입"]
+  C --> E["sources<br/>출처 메타데이터 보존"]
+  D --> F["답글 작성·검토"]
+  F --> G["답글과 출처 JSON"]
+  E --> G

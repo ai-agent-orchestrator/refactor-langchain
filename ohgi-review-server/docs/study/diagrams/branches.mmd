@@ -1,0 +1,5 @@
+flowchart TD
+  A["원본: SDK 직접 호출"] --> B["branch1 / 1·2단계<br/>LCEL + 구조화 출력"]
+  B --> C["branch2 / 3·4단계<br/>검토 그래프 + SSE"]
+  C --> D["branch3 / 5·6단계<br/>체크포인터 + 규정 RAG"]
+  D --> E["기존 저장소·예외 처리 보존"]

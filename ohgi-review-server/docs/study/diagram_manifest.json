@@ -1,0 +1,128 @@
+[
+  {
+    "name": "agent.mmd",
+    "width": 417.9329833984375,
+    "height": 544.734375,
+    "nodes": 5
+  },
+  {
+    "name": "async.mmd",
+    "width": 741.8203125,
+    "height": 944,
+    "nodes": 6
+  },
+  {
+    "name": "branches.mmd",
+    "width": 288,
+    "height": 648,
+    "nodes": 5
+  },
+  {
+    "name": "cache.mmd",
+    "width": 573.09375,
+    "height": 878,
+    "nodes": 6
+  },
+  {
+    "name": "embedding.mmd",
+    "width": 600.515625,
+    "height": 494,
+    "nodes": 7
+  },
+  {
+    "name": "errors.mmd",
+    "width": 756.57421875,
+    "height": 788.296875,
+    "nodes": 8
+  },
+  {
+    "name": "lcel.mmd",
+    "width": 278.828125,
+    "height": 588,
+    "nodes": 5
+  },
+  {
+    "name": "lecture12.mmd",
+    "width": 655.46484375,
+    "height": 981.078125,
+    "nodes": 7
+  },
+  {
+    "name": "lifespan.mmd",
+    "width": 592,
+    "height": 692,
+    "nodes": 7
+  },
+  {
+    "name": "loop.mmd",
+    "width": 429.6640625,
+    "height": 784.40625,
+    "nodes": 5
+  },
+  {
+    "name": "memory.mmd",
+    "width": 592,
+    "height": 508.10888671875,
+    "nodes": 6
+  },
+  {
+    "name": "overview.mmd",
+    "width": 262.0625,
+    "height": 793.40625,
+    "nodes": 6
+  },
+  {
+    "name": "project12.mmd",
+    "width": 526.0625,
+    "height": 925.265625,
+    "nodes": 7
+  },
+  {
+    "name": "rag.mmd",
+    "width": 551.765625,
+    "height": 722,
+    "nodes": 7
+  },
+  {
+    "name": "retriever.mmd",
+    "width": 290.484375,
+    "height": 719.4345703125,
+    "nodes": 6
+  },
+  {
+    "name": "revise.mmd",
+    "width": 288,
+    "height": 826,
+    "nodes": 7
+  },
+  {
+    "name": "sse.mmd",
+    "width": 841.828125,
+    "height": 739.84375,
+    "nodes": 7
+  },
+  {
+    "name": "state.mmd",
+    "width": 401.03125,
+    "height": 825.96875,
+    "nodes": 5
+  },
+  {
+    "name": "stores.mmd",
+    "width": 525.03125,
+    "height": 556,
+    "nodes": 5
+  },
+  {
+    "name": "structured.mmd",
+    "width": 591.609375,
+    "height": 678,
+    "nodes": 6
+  },
+  {
+    "name": "tests.mmd",
+    "width": 485.03125,
+    "height": 616,
+    "nodes": 5
+  }
+]

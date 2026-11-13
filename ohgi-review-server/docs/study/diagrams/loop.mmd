@@ -1,0 +1,7 @@
+flowchart TD
+  A["첫 초안<br/>attempts=0"] --> B{"검토 통과?"}
+  B -->|"예"| E["종료"]
+  B -->|"아니오"| C{"attempts가 2 미만?"}
+  C -->|"예"| D["다음 초안<br/>attempts + 1"]
+  D --> B
+  C -->|"아니오"| E

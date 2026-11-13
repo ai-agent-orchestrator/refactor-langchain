@@ -1,0 +1,6 @@
+flowchart TD
+  A["ReplyState<br/>리뷰 / rating / reply"] --> B["draft<br/>reply 갱신"]
+  B --> C["review<br/>passed / feedback 갱신"]
+  C --> D{"route<br/>판정 + attempts"}
+  D -->|"다시 작성"| B
+  D -->|"통과 또는 상한"| E["finish"]

@@ -1,0 +1,6 @@
+flowchart TD
+  A["입력 데이터"] --> B["prompt"]
+  B --> C["llm.with_structured_output<br/>ReplyDraft"]
+  C --> D["Pydantic 객체<br/>reply / tone / needs_followup"]
+  D --> E["HTTP DTO<br/>needsFollowup으로 직렬화"]
+  C -->|"형식 오류"| F["AiRequestError → 502"]

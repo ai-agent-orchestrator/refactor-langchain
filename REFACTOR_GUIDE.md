@@ -6,8 +6,8 @@
 | 브랜치 | 누적 내용 | 읽을 문서 |
 |---|---|---|
 | branch1 | 1단계 LCEL + 2단계 구조화 답글 | [1단계](ohgi-review-server/docs/01_LCEL.md), [2단계](ohgi-review-server/docs/02_STRUCTURED_OUTPUT.md) |
-| branch2 | 3단계 검토·재작성 + 4단계 SSE | 해당 브랜치의 03·04 문서 |
-| branch3 | 5단계 체크포인터 수정 + 6단계 규정 RAG | 해당 브랜치의 05·06 문서 |
+| branch2 | 3단계 검토·재작성 + 4단계 SSE | [3단계](ohgi-review-server/docs/03_REVIEW_GRAPH.md), [4단계](ohgi-review-server/docs/04_SSE.md) |
+| branch3 | 5단계 체크포인터 수정 + 6단계 규정 RAG | [5단계](ohgi-review-server/docs/05_MEMORY.md), [6단계](ohgi-review-server/docs/06_POLICY_RAG.md) |
 
 ```powershell
 git switch branch1
@@ -17,3 +17,13 @@ uv run uvicorn app.main:app --port 8011
 ```
 
 브랜치 전환 전 서버를 끄고, 전환 후 같은 폴더에서 `uv sync`를 다시 실행하세요. `.env`는 커밋되지 않습니다. 기본 fake 모드로 먼저 API 흐름을 확인할 수 있습니다. 원본 README는 이력과 원본 앱 설명을 위해 보존했습니다. 변경된 리뷰 서버 사용법은 이 문서와 단계별 문서를 기준으로 보세요.
+
+## 그림으로 읽는 학습자료
+
+- [26쪽 다크모드 PDF](ohgi-review-server/output/pdf/LANGCHAIN_REFACTOR_STUDY_DARK.pdf)
+- [수업 05·06·07·10·11·12·13 → 실제 코드 대응](ohgi-review-server/docs/LECTURE_TO_CODE.md)
+- [Mermaid 원본 21개](ohgi-review-server/docs/study/diagrams)
+- [비동기 전환 판단 기준](ohgi-review-server/docs/ASYNC_DECISIONS.md)
+- [검증 결과와 실제 모델 확인 절차](ohgi-review-server/docs/VALIDATION.md)
+
+PDF와 전체 대응 자료는 branch3에 있습니다. 코드의 `수업 05`, `수업 11` 등 주석은 대응 문서와 연결됩니다.

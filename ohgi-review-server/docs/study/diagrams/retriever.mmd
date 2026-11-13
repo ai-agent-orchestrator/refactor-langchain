@@ -1,0 +1,6 @@
+flowchart TD
+  A["리뷰 문자열"] --> B["PolicyRetriever.ainvoke"]
+  B --> C["질문을 벡터로 변환"]
+  C --> D[("Chroma<br/>벡터·본문·metadata")]
+  D --> E["상위 k개 Document"]
+  E --> F["page_content = 본문<br/>metadata = 출처·절·버전"]

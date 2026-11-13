@@ -1,0 +1,7 @@
+flowchart TD
+  A["graph.astream<br/>messages + updates"] --> B{"이벤트 모드"}
+  B -->|"messages"| C{"노드가 draft?"}
+  C -->|"예"| D["token 이벤트 전송"]
+  C -->|"아니오"| E["검토 내부 출력 제외"]
+  B -->|"updates"| F["최종 상태 누적"]
+  F --> G["done: 최종 답글 JSON"]

@@ -1,0 +1,6 @@
+flowchart TD
+  S([START]) --> M["model: LLM 판단"]
+  M --> Q{"tool_calls 존재?"}
+  Q -->|"예"| T["tools: ToolNode 실행"]
+  T --> M
+  Q -->|"아니오"| E([END])

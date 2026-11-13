@@ -1,0 +1,5 @@
+flowchart LR
+  A["검증 범위"] --> B["실제 Chroma + 오프라인 벡터<br/>검색·저장 경로"]
+  A --> C["실제 SDK + HTTP 전송 대역<br/>구조화·임베딩·오류 경로"]
+  A --> D["실제 로컬 Uvicorn<br/>MainThread·SSE·수정 API"]
+  A -.-> E["실제 유료 모델 품질<br/>별도 실행 필요"]

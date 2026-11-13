@@ -1,0 +1,10 @@
+flowchart TD
+  A["retrieve: 검색"] --> B{"grade<br/>관련 문서 있음?"}
+  B -->|"없음<br/>검색 예산 남음"| C["rewrite: 검색어 변경"]
+  C --> A
+  B -->|"있음"| D["generate: 답변 작성"]
+  D --> E{"check: 근거 일치?"}
+  E -->|"불일치<br/>생성 예산 남음"| D
+  E -->|"일치"| F["END"]
+  B -->|"검색 상한"| G["give_up"]
+  E -->|"생성 상한"| G

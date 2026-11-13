@@ -1,0 +1,8 @@
+flowchart TD
+  A["요청"] --> B{"응답 헤더 전?"}
+  B -->|"없는 리뷰"| C["404 JSON"]
+  B -->|"일반 API 외부 실패"| D["502 JSON"]
+  B -->|"SSE 시작"| E["200 text/event-stream"]
+  E --> F{"스트림 결과"}
+  F -->|"실패"| G["error 이벤트 후 종료"]
+  F -->|"성공"| H["done 이벤트"]

@@ -1,0 +1,5 @@
+flowchart TD
+  A["리뷰 데이터 dict"] --> B["ChatPromptTemplate<br/>변수와 역할 채우기"]
+  B --> C["ChatOpenAI<br/>await 모델 호출"]
+  C --> D["StrOutputParser<br/>AIMessage → str"]
+  D --> E["ReplyResponse JSON"]

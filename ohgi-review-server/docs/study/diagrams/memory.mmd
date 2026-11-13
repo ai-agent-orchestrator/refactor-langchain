@@ -1,0 +1,6 @@
+flowchart TD
+  A["리뷰 1 생성 / 수정 요청"] --> G["같은 공유 그래프"]
+  B["리뷰 2 생성 / 수정 요청"] --> G
+  G --> C[("InMemorySaver")]
+  C --> D["thread_id=1<br/>리뷰 1의 원본·직전 초안"]
+  C --> E["thread_id=2<br/>리뷰 2의 원본·직전 초안"]

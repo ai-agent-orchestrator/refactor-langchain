@@ -1,0 +1,5 @@
+flowchart LR
+  A["데이터의 역할"] --> B["ReviewRepository<br/>원본 리뷰 CRUD"]
+  A --> C["InMemorySaver<br/>리뷰별 그래프 상태"]
+  A --> D["Chroma<br/>규정 문서 벡터 검색"]
+  A -.-> E["장기 사용자 프로필 Store<br/>이번 범위에서는 미구현"]
