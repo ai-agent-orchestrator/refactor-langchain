@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from app.dependencies import ReplyServiceDep, ReviewServiceDep
-from app.schemas.review import ReplyResponse, ReviewCreateRequest, ReviewResponse
+from app.schemas.review import ReplyResponse, ReplyRevisionRequest, ReviewCreateRequest, ReviewResponse
 
 router = APIRouter(prefix="/api/reviews", tags=["리뷰"])
 logger = logging.getLogger("uvicorn.error")
@@ -36,3 +36,9 @@ async def stream_reply(review_id: int, service: ReplyServiceDep):
     inputs = await service.prepare(review_id)  # 헤더 전 없는 리뷰는 기존 404로 처리
     return StreamingResponse(service.stream_reply(review_id, inputs), media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@router.post("/{review_id}/reply/revise", response_model=ReplyResponse)
+async def revise_reply(review_id: int, body: ReplyRevisionRequest, service: ReplyServiceDep):
+    logger.info("[revise] thread=%s reviewId=%s", current_thread().name, review_id)
+    return await service.revise_reply(review_id, body.instruction)

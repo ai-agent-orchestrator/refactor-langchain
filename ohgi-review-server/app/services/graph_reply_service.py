@@ -29,6 +29,9 @@ class GraphReplyService:
         return {"customer_name": review.customer_name, "rating": review.rating, "review_text": review.content,
                 "reply": "", "feedback": "", "attempts": 0, "draft_count": 0, "completed": False}
 
+    def config(self, review_id: int) -> dict:
+        return {"recursion_limit": 20}
+
     def response(self, review_id: int, state: dict) -> ReplyResponse:
         return ReplyResponse(review_id=review_id, model=self.client.model, reply=state["reply"],
                              tone=state["tone"], needs_followup=state["needs_followup"],
@@ -37,7 +40,7 @@ class GraphReplyService:
     async def create_reply(self, review_id: int) -> ReplyResponse:
         inputs = await self.prepare(review_id)
         try:
-            result = await self.graph.ainvoke(inputs, config={"recursion_limit": 20})
+            result = await self.graph.ainvoke(inputs, config=self.config(review_id))
         except UPSTREAM_ERRORS as exc:
             raise AiRequestError("OpenAI 호출 또는 응답 검증에 실패했습니다.") from exc
         return self.response(review_id, result)
@@ -48,7 +51,7 @@ class GraphReplyService:
         attempt = -1
         try:
             # messages는 실시간 토큰, updates는 최종 상태/재작성 결과를 얻는다.
-            async for mode, data in self.graph.astream(inputs, config={"recursion_limit": 20}, stream_mode=["messages", "updates"]):
+            async for mode, data in self.graph.astream(inputs, config=self.config(review_id), stream_mode=["messages", "updates"]):
                 if mode == "messages":
                     chunk, metadata = data
                     if metadata.get("langgraph_node") != "draft":

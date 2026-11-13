@@ -1,4 +1,7 @@
 from contextlib import asynccontextmanager
+from collections import defaultdict
+import asyncio
+from langgraph.checkpoint.memory import InMemorySaver
 
 from fastapi import FastAPI
 
@@ -21,7 +24,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         application.state.llm_client = client
         try:
             application.state.reply_chain = build_reply_chain(client)
-            application.state.reply_graph = build_graph(client)
+            application.state.reply_saver = InMemorySaver()
+            application.state.reply_locks = defaultdict(asyncio.Lock)
+            application.state.reply_graph = build_graph(client, checkpointer=application.state.reply_saver)
             yield
         finally:
             await client.close()

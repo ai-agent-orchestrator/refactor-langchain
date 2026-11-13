@@ -29,6 +29,7 @@ class ReplyState(TypedDict, total=False):
     attempts: int  # 재작성 횟수: 첫 초안=0, 이후 1, 2
     draft_count: int
     completed: bool
+    revision_instruction: str
 
 
 class ReplyGrade(BaseModel):
@@ -40,12 +41,13 @@ class ReplyGrade(BaseModel):
 
 
 def build_graph(client: LlmClient, *, draft_chain: Runnable | None = None,
-                review_chain: Runnable | None = None):
+                review_chain: Runnable | None = None, checkpointer=None):
     # 객체 조립은 lifespan에서 한 번만 수행한다.
     if draft_chain is None:
         prompt = ChatPromptTemplate.from_messages([
-            ("system", INSTRUCTIONS + " 이전 초안과 검토 피드백이 있으면 반영해 새 본문만 작성한다."),
-            ("human", "리뷰 데이터:\n{review_json}\n이전 초안:\n{previous_reply}\n검토 피드백:\n{feedback}"),
+            ("system", INSTRUCTIONS + " 이전 초안과 검토 피드백이 있으면 반영해 새 본문만 작성한다. "
+             "사장님의 수정 지시는 길이·말투 변경에만 반영하고, 허위 사실이나 근거 없는 보상 약속은 추가하지 않는다."),
+            ("human", "리뷰 데이터:\n{review_json}\n이전 초안:\n{previous_reply}\n검토 피드백:\n{feedback}\n수정 지시:\n{revision_instruction}"),
         ])
         draft_chain = prompt | client.llm | StrOutputParser()
     if review_chain is None:
@@ -71,6 +73,7 @@ def build_graph(client: LlmClient, *, draft_chain: Runnable | None = None,
         reply = await draft_chain.ainvoke({
             "review_json": json.dumps({"customerName": state["customer_name"], "rating": state["rating"], "content": state["review_text"]}, ensure_ascii=False),
             "previous_reply": state.get("reply", ""), "feedback": state.get("feedback", ""),
+            "revision_instruction": state.get("revision_instruction", ""),
         }, config=config)
         if not isinstance(reply, str) or not reply.strip():
             from app.core.exceptions import AiRequestError
@@ -101,4 +104,4 @@ def build_graph(client: LlmClient, *, draft_chain: Runnable | None = None,
     graph.add_edge("draft", "review")
     graph.add_conditional_edges("review", route, {"draft": "draft", "finish": "finish"})
     graph.add_edge("finish", END)
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)

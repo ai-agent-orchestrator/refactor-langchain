@@ -24,6 +24,13 @@ class FakeReviewChatModel(BaseChatModel):
         start = prompt.find("{")
         data = json.JSONDecoder().raw_decode(prompt[start:])[0] if start >= 0 else {}
         content = data.get("content", "")
+        if "수정 지시:\n" in prompt:
+            instruction = prompt.split("수정 지시:\n", 1)[1]
+            previous = prompt.split("이전 초안:\n", 1)[1].split("\n검토 피드백:", 1)[0]
+            if previous and "한 문장" in instruction:
+                return previous.split(".", 1)[0] + "."
+            if previous and "정중" in instruction:
+                return previous.rstrip(".") + ". 소중한 말씀에 깊이 감사드립니다."
         if data.get("rating", 5) <= 2:
             return "불편을 드려 죄송합니다. 남겨주신 문제를 담당자가 확인하겠습니다."
         return "소중한 의견 감사합니다. 더 나은 서비스를 준비하겠습니다."
