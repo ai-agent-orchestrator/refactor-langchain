@@ -15,6 +15,7 @@ from app.core.config import Settings
 from app.core.exceptions import AiRequestError
 from app.dependencies import get_reply_chain
 from app.main import create_app
+from app.domain.reply import ReplyDraft
 from app.repositories.review_repository import ReviewRepository
 from app.routers.review_router import router
 
@@ -70,11 +71,11 @@ class ReviewApiTests(unittest.TestCase):
 
     def test_reply_awaits_llm_with_stored_review(self):
         review_id = self.register()
-        recorder = SimpleNamespace(ainvoke=AsyncMock(return_value="정중한 답글 초안"))
+        recorder = SimpleNamespace(ainvoke=AsyncMock(return_value=ReplyDraft(reply="정중한 답글 초안", tone="감사", needs_followup=False)))
         self.app.dependency_overrides[get_reply_chain] = lambda: recorder
         response = self.client.post(f"/api/reviews/{review_id}/reply")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "fake-llm"})
+        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "fake-llm", "tone": "감사", "needsFollowup": False})
         recorder.ainvoke.assert_awaited_once()
         inputs = recorder.ainvoke.await_args.args[0]
         self.assertEqual(json.loads(inputs["review_json"]), BODY)

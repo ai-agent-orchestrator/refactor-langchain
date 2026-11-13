@@ -20,3 +20,5 @@ class ReplyResponse(CamelModel):
     review_id: int
     reply: str
     model: str
+    tone: str
+    needs_followup: bool
