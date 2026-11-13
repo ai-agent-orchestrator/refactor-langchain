@@ -13,7 +13,7 @@ from openai import APIConnectionError
 from app.clients.llm_client import OpenAiLlmClient
 from app.core.config import Settings
 from app.core.exceptions import AiRequestError
-from app.dependencies import get_reply_chain
+from app.dependencies import get_reply_graph
 from app.main import create_app
 from app.domain.reply import ReplyDraft
 from app.repositories.review_repository import ReviewRepository
@@ -64,26 +64,27 @@ class ReviewApiTests(unittest.TestCase):
 
     def test_missing_reply_does_not_call_llm(self):
         recorder = SimpleNamespace(ainvoke=AsyncMock())
-        self.app.dependency_overrides[get_reply_chain] = lambda: recorder
+        self.app.dependency_overrides[get_reply_graph] = lambda: recorder
         response = self.client.post("/api/reviews/999/reply")
         self.assertEqual(response.status_code, 404)
         recorder.ainvoke.assert_not_awaited()
 
     def test_reply_awaits_llm_with_stored_review(self):
         review_id = self.register()
-        recorder = SimpleNamespace(ainvoke=AsyncMock(return_value=ReplyDraft(reply="정중한 답글 초안", tone="감사", needs_followup=False)))
-        self.app.dependency_overrides[get_reply_chain] = lambda: recorder
+        recorder = SimpleNamespace(ainvoke=AsyncMock(return_value={"reply":"정중한 답글 초안", "tone":"감사", "needs_followup":False, "passed":True, "attempts":0}))
+        self.app.dependency_overrides[get_reply_graph] = lambda: recorder
         response = self.client.post(f"/api/reviews/{review_id}/reply")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "fake-llm", "tone": "감사", "needsFollowup": False})
+        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "fake-llm", "tone": "감사", "needsFollowup": False, "passed": True, "attempts": 0})
         recorder.ainvoke.assert_awaited_once()
         inputs = recorder.ainvoke.await_args.args[0]
-        self.assertEqual(json.loads(inputs["review_json"]), BODY)
+        self.assertEqual(inputs["review_text"], BODY["content"])
+        self.assertEqual(inputs["rating"], BODY["rating"])
 
     def test_llm_failure_is_502(self):
         review_id = self.register()
         failure = SimpleNamespace(ainvoke=AsyncMock(side_effect=AiRequestError("연습용 연결 실패")))
-        self.app.dependency_overrides[get_reply_chain] = lambda: failure
+        self.app.dependency_overrides[get_reply_graph] = lambda: failure
         response = self.client.post(f"/api/reviews/{review_id}/reply")
         self.assertEqual(response.status_code, 502)
         self.assertEqual(response.json()["code"], "AI_REQUEST_FAILED")

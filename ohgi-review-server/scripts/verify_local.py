@@ -15,7 +15,7 @@ def main() -> None:
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
-    env = {**os.environ, "FAKE_LLM": "true", "FAKE_LLM_DELAY_SECONDS": "0",
+    env = {**os.environ, "FAKE_LLM": "true", "FAKE_LLM_DELAY_SECONDS": "0.01",
            "PYTHONIOENCODING": "utf-8"}
     server = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(port)],
@@ -53,6 +53,19 @@ def main() -> None:
         assert status == 200 and json.loads(raw)["model"] == "fake-llm"
         assert request("/api/reviews", "POST", {**body, "rating": 6})[0] == 422
         assert request("/api/reviews/999")[0] == 404
+        req = Request(base + f"/api/reviews/{review_id}/reply/stream", data=b"", method="POST")
+        token_times = []
+        events = []
+        with urlopen(req, timeout=8) as response:
+            for raw_line in response:
+                line = raw_line.decode("utf-8").strip()
+                if line.startswith("event: "):
+                    event = line[7:]
+                    events.append(event)
+                    if event == "token":
+                        token_times.append(time.monotonic())
+        assert events[-1] == "done" and len(token_times) > 5, events
+        assert token_times[-1] - token_times[0] > 0.05, "Tokens arrived as one buffered block"
     finally:
         server.terminate()
         try:
@@ -63,8 +76,12 @@ def main() -> None:
     assert "[reply] thread=MainThread" in logs, logs
     assert "[register] thread=AnyIO worker thread" in logs, logs
     assert "[find] thread=AnyIO worker thread" in logs, logs
+    assert "[draft] attempts=0 thread=MainThread" in logs, logs
+    assert "[review] passed=True attempts=0 thread=MainThread" in logs, logs
+    assert logs.count("[model:create]") == 1, logs
     print("PASS: live localhost /docs 200; create 201; get/reply 200; rating 6 -> 422; missing -> 404")
     print("PASS: sync handlers -> AnyIO worker thread; async reply -> MainThread")
+    print("PASS: model created once; draft/review on MainThread; incremental SSE tokens before done")
     print("Fake mode only. Server stopped. No real OpenAI calls or manual Postman checks.")
 
 

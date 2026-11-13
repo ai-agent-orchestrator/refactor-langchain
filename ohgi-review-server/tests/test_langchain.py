@@ -74,7 +74,7 @@ def test_structured_reply_and_openapi(rating, content, tone, followup):
         assert response.status_code == 200
         assert response.json()["tone"] == tone
         assert response.json()["needsFollowup"] is followup
-        assert set(response.json()) == {"reviewId", "reply", "model", "tone", "needsFollowup"}
+        assert set(response.json()) == {"reviewId", "reply", "model", "tone", "needsFollowup", "passed", "attempts"}
         properties = api.get("/openapi.json").json()["components"]["schemas"]["ReplyResponse"]["properties"]
         assert "needsFollowup" in properties and "tone" in properties
 

@@ -7,6 +7,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 from langchain_openai import ChatOpenAI
 from app.core.config import Settings
+from app.clients.fake_chat_model import FakeReviewChatModel
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -18,7 +19,7 @@ class LlmClient(Protocol):
 class FakeLlmClient:
     model = "fake-llm"
     def __init__(self, delay_seconds: float):
-        self.llm = FakeListChatModel(responses=["(가짜 답글 초안) 소중한 의견 감사합니다. 남겨주신 경험을 확인하겠습니다."], sleep=delay_seconds)
+        self.llm = FakeReviewChatModel(delay_seconds=delay_seconds)
         logger.info("[model:create] fake thread=%s", current_thread().name)
     async def close(self) -> None:
         pass

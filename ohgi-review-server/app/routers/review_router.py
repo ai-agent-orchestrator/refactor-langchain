@@ -2,6 +2,7 @@ import logging
 from threading import current_thread
 
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 
 from app.dependencies import ReplyServiceDep, ReviewServiceDep
 from app.schemas.review import ReplyResponse, ReviewCreateRequest, ReviewResponse
@@ -26,3 +27,12 @@ def find_review(review_id: int, service: ReviewServiceDep) -> ReviewResponse:
 async def create_reply(review_id: int, service: ReplyServiceDep) -> ReplyResponse:
     logger.info("[reply] thread=%s reviewId=%s", current_thread().name, review_id)
     return await service.create_reply(review_id)
+
+
+@router.post("/{review_id}/reply/stream", response_class=StreamingResponse,
+             responses={200: {"content": {"text/event-stream": {}}, "description": "draft_start/token/review/done/error 이벤트"}})
+async def stream_reply(review_id: int, service: ReplyServiceDep):
+    logger.info("[stream] thread=%s reviewId=%s", current_thread().name, review_id)
+    inputs = await service.prepare(review_id)  # 헤더 전 없는 리뷰는 기존 404로 처리
+    return StreamingResponse(service.stream_reply(review_id, inputs), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

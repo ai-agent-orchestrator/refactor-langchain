@@ -22,3 +22,5 @@ class ReplyResponse(CamelModel):
     model: str
     tone: str
     needs_followup: bool
+    passed: bool = False
+    attempts: int = 0
