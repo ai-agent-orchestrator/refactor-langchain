@@ -3,7 +3,7 @@ name = "ohgi-review-server"
 version = "0.1.0"
 description = "수업 과제: 동기 리뷰 등록·조회와 비동기 답글 생성"
 requires-python = ">=3.14"
-dependencies = ["fastapi[standard]", "pydantic-settings", "openai", "httpx", "langchain-core>=1,<2", "langchain-openai>=1,<2", "langgraph>=1,<2"]
+dependencies = ["fastapi[standard]", "pydantic-settings", "openai", "httpx", "langchain-core>=1,<2", "langchain-openai>=1,<2", "langgraph>=1,<2", "langchain-chroma>=1,<2", "langchain-text-splitters>=1,<2"]
 
 [dependency-groups]
 dev = ["pytest", "pytest-cov"]

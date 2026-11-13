@@ -32,6 +32,8 @@ class FakeReviewChatModel(BaseChatModel):
             if previous and "정중" in instruction:
                 return previous.rstrip(".") + ". 소중한 말씀에 깊이 감사드립니다."
         if data.get("rating", 5) <= 2:
+            if "환불" in content and "매장 규정:" in prompt:
+                return "불편을 드려 죄송합니다. 환불 요청은 주문 내용과 상황을 담당자가 확인한 뒤 절차를 안내하겠습니다."
             return "불편을 드려 죄송합니다. 남겨주신 문제를 담당자가 확인하겠습니다."
         return "소중한 의견 감사합니다. 더 나은 서비스를 준비하겠습니다."
 

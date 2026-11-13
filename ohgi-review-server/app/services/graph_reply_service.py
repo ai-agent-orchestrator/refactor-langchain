@@ -35,7 +35,7 @@ class GraphReplyService:
     def response(self, review_id: int, state: dict) -> ReplyResponse:
         return ReplyResponse(review_id=review_id, model=self.client.model, reply=state["reply"],
                              tone=state["tone"], needs_followup=state["needs_followup"],
-                             passed=state["passed"], attempts=state["attempts"])
+                             passed=state["passed"], attempts=state["attempts"], sources=state.get("sources", []))
 
     async def create_reply(self, review_id: int) -> ReplyResponse:
         inputs = await self.prepare(review_id)
@@ -52,6 +52,7 @@ class GraphReplyService:
         try:
             # messages는 실시간 토큰, updates는 최종 상태/재작성 결과를 얻는다.
             async for mode, data in self.graph.astream(inputs, config=self.config(review_id), stream_mode=["messages", "updates"]):
+                # 수업 11 §5-2/§6: 다중 모드 + async streaming. model 필터를 draft로 변경.
                 if mode == "messages":
                     chunk, metadata = data
                     if metadata.get("langgraph_node") != "draft":

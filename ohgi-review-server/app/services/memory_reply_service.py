@@ -12,6 +12,7 @@ class MemoryReplyService(GraphReplyService):
         self.locks = locks
 
     def config(self, review_id: int) -> dict:
+        # 수업 13 §1: thread_id는 대화방 키이며 OS 실행 스레드 이름과 무관하다.
         return {"configurable": {"thread_id": str(review_id)}, "recursion_limit": 20}
 
     async def prepare(self, review_id: int) -> dict:
@@ -31,6 +32,7 @@ class MemoryReplyService(GraphReplyService):
         await to_thread.run_sync(self.repository.find_by_id, review_id)
         async with self.locks[review_id]:
             snapshot = await self.graph.aget_state(self.config(review_id))
+            # 수업 13 §2 get_state의 async 대응. 상태를 확인하고 새 지시만 전달한다.
             if not snapshot.values.get("completed") or not snapshot.values.get("reply") or snapshot.next:
                 raise HTTPException(status_code=409, detail="먼저 답글 초안을 완성한 뒤 수정해 주세요.")
             try:

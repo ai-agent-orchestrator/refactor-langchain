@@ -30,7 +30,7 @@ def test_real_chatopenai_error_becomes_502(status, code):
         async with httpx.AsyncClient(transport=transport) as http:
             llm = ChatOpenAI(model="invalid-model", api_key="invalid-key", max_retries=0, http_async_client=http)
             client = SimpleNamespace(model="invalid-model", llm=llm, close=AsyncMock())
-            app = create_app(settings(fake_llm=False, openai_api_key="invalid-key"))
+            app = create_app(settings(fake_llm=False, openai_api_key="invalid-key", rag_enabled=False))
             with patch("app.main.OpenAiLlmClient", return_value=client):
                 async with app.router.lifespan_context(app):
                     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as api:
@@ -74,7 +74,7 @@ def test_structured_reply_and_openapi(rating, content, tone, followup):
         assert response.status_code == 200
         assert response.json()["tone"] == tone
         assert response.json()["needsFollowup"] is followup
-        assert set(response.json()) == {"reviewId", "reply", "model", "tone", "needsFollowup", "passed", "attempts"}
+        assert set(response.json()) == {"reviewId", "reply", "model", "tone", "needsFollowup", "passed", "attempts", "sources"}
         properties = api.get("/openapi.json").json()["components"]["schemas"]["ReplyResponse"]["properties"]
         assert "needsFollowup" in properties and "tone" in properties
 

@@ -24,7 +24,15 @@ class ReplyResponse(CamelModel):
     needs_followup: bool
     passed: bool = False
     attempts: int = 0
+    sources: list["PolicySource"] = Field(default_factory=list)
 
 
 class ReplyRevisionRequest(CamelModel):
     instruction: str = Field(min_length=1, max_length=500, description="이전 답글의 말투·길이에 대한 수정 지시")
+
+
+class PolicySource(CamelModel):
+    source: str
+    section: str
+    chunk_id: str
+    policy_version: str

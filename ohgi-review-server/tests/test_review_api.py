@@ -75,7 +75,7 @@ class ReviewApiTests(unittest.TestCase):
         self.app.dependency_overrides[get_reply_graph] = lambda: recorder
         response = self.client.post(f"/api/reviews/{review_id}/reply")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "fake-llm", "tone": "감사", "needsFollowup": False, "passed": True, "attempts": 0})
+        self.assertEqual(response.json(), {"reviewId": review_id, "reply": "정중한 답글 초안", "model": "fake-llm", "tone": "감사", "needsFollowup": False, "passed": True, "attempts": 0, "sources": []})
         recorder.ainvoke.assert_awaited_once()
         inputs = recorder.ainvoke.await_args.args[0]
         self.assertEqual(inputs["review_text"], BODY["content"])

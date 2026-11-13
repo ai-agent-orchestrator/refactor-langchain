@@ -16,6 +16,7 @@ def main() -> None:
         sock.bind(("127.0.0.1", 0))
         port = sock.getsockname()[1]
     env = {**os.environ, "FAKE_LLM": "true", "FAKE_LLM_DELAY_SECONDS": "0.01",
+           "RAG_ENABLED": "true",
            "PYTHONIOENCODING": "utf-8"}
     server = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(port)],
@@ -51,6 +52,10 @@ def main() -> None:
         assert request(f"/api/reviews/{review_id}")[0] == 200
         status, raw = request(f"/api/reviews/{review_id}/reply", "POST")
         assert status == 200 and json.loads(raw)["model"] == "fake-llm"
+        original = json.loads(raw)
+        assert original["sources"]
+        status, raw = request(f"/api/reviews/{review_id}/reply/revise", "POST", {"instruction": "한 문장으로 줄여 줘"})
+        assert status == 200 and json.loads(raw)["reply"] == original["reply"].split(".", 1)[0] + "."
         assert request("/api/reviews", "POST", {**body, "rating": 6})[0] == 422
         assert request("/api/reviews/999")[0] == 404
         req = Request(base + f"/api/reviews/{review_id}/reply/stream", data=b"", method="POST")
@@ -79,9 +84,12 @@ def main() -> None:
     assert "[draft] attempts=0 thread=MainThread" in logs, logs
     assert "[review] passed=True attempts=0 thread=MainThread" in logs, logs
     assert logs.count("[model:create]") == 1, logs
+    assert "[retrieve] chunks=4 thread=MainThread" in logs, logs
+    assert "[revise] thread=MainThread" in logs, logs
     print("PASS: live localhost /docs 200; create 201; get/reply 200; rating 6 -> 422; missing -> 404")
     print("PASS: sync handlers -> AnyIO worker thread; async reply -> MainThread")
     print("PASS: model created once; draft/review on MainThread; incremental SSE tokens before done")
+    print("PASS: real Chroma retrieval and source metadata; checkpointed one-sentence revision")
     print("Fake mode only. Server stopped. No real OpenAI calls or manual Postman checks.")
 
 
