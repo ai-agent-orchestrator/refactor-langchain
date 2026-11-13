@@ -1,3 +1,30 @@
+# refactor-langchain - 단계별 리뷰 답글 서버
+
+`legal-intake-fastapi-lab`의 원본 코드를 보존하고 `ohgi-review-server`를 LangChain·LangGraph로 발전시킨 학습 저장소입니다. **main은 원본 기준과 안내**, 실제 실습 코드는 아래 세 브랜치에서 확인합니다.
+
+| 브랜치 | 누적 구현 | 설명 |
+|---|---|---|
+| [branch1](https://github.com/ai-agent-orchestrator/refactor-langchain/tree/branch1) | 1·2단계: LCEL 비동기 체인, 구조화 출력 | [1단계](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch1/ohgi-review-server/docs/01_LCEL.md), [2단계](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch1/ohgi-review-server/docs/02_STRUCTURED_OUTPUT.md) |
+| [branch2](https://github.com/ai-agent-orchestrator/refactor-langchain/tree/branch2) | 3·4단계: 상한 있는 자체 검토·재작성, SSE | [3단계](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch2/ohgi-review-server/docs/03_REVIEW_GRAPH.md), [4단계](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch2/ohgi-review-server/docs/04_SSE.md) |
+| [branch3](https://github.com/ai-agent-orchestrator/refactor-langchain/tree/branch3) | 5·6단계: 체크포인터 수정 API, 매장 규정 Chroma RAG | [5단계](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch3/ohgi-review-server/docs/05_MEMORY.md), [6단계](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch3/ohgi-review-server/docs/06_POLICY_RAG.md) |
+
+```powershell
+git switch branch3
+cd ohgi-review-server
+uv sync --python 3.14
+uv run uvicorn app.main:app --port 8011
+```
+
+기본 fake 모드로 API 흐름을 확인할 수 있습니다. 브랜치 전환 전에 서버를 종료하고 전환 후 `uv sync`를 다시 실행하세요. 브랜치별 실제 사용법은 위 단계 문서를 기준으로 봅니다.
+
+**학습자료:** [26쪽 다크모드 PDF](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch3/ohgi-review-server/output/pdf/LANGCHAIN_REFACTOR_STUDY_DARK.pdf) · [수업 → 코드 주석집](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch3/ohgi-review-server/docs/LECTURE_TO_CODE.md) · [Mermaid 원본](https://github.com/ai-agent-orchestrator/refactor-langchain/tree/branch3/ohgi-review-server/docs/study/diagrams) · [검증 결과](https://github.com/ai-agent-orchestrator/refactor-langchain/blob/branch3/ohgi-review-server/docs/VALIDATION.md).
+
+개인 복습을 위한 AI 생성 참고 구현입니다. 수업 제출 규칙을 확인하고 본인이 작성·검증한 코드와 구분해 사용하세요. 원본 저장소의 다른 앱과 미커밋 작업은 변경하지 않았습니다.
+
+---
+
+## 원본 프로젝트 설명 (아래 내용 보존)
+
 # Legal Intake FastAPI Lab
 
 FastAPI 기반 상담 준비 안내와 법률 마케팅 도구를 만드는 공개 프로젝트입니다. 이 저장소의 **필수 개발 범위는 기존 접수·안내 Python action, 보안 action 9개, 법률 마케팅 강화**입니다. 앱 API는 기존 MVP를 포함해 **최대 11개**로 제한합니다.
